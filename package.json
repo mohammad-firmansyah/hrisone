@@ -19,7 +19,11 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "typeorm": "typeorm-ts-node-esm",
+    "migration:run": "typeorm-ts-node-esm migration:run -d src/db/datasource/MysqlDatasource.ts",
+    "migration:revert": "typeorm-ts-node-esm migration:revert -d src/db/datasource/MysqlDatasource.ts",
+    "migration:show": "typeorm-ts-node-esm migration:show -d src/db/datasource/MysqlDatasource.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
@@ -31,6 +35,7 @@
     "mysql2": "^3.24.6",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "ts-node": "^10.9.2",
     "typeorm": "^1.1.2"
   },
   "devDependencies": {
