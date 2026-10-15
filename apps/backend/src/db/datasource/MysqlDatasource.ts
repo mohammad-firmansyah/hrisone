@@ -2,13 +2,7 @@ import { DataSource } from "typeorm";
 import { Attendance } from "../../attendance/entities/attendance.entity.js";
 import { User } from "../../user/entities/user.entity.js";
 import { Role } from "../../role/entities/role.entity.js";
-if (typeof process.loadEnvFile === 'function') {
-    try {
-        process.loadEnvFile();
-    } catch {
-        // Ignore if .env is missing (e.g., provided via environment)
-    }
-}
+import '../../env.js';
 
 export const MysqlDatasource = new DataSource({
     type: 'mysql',
