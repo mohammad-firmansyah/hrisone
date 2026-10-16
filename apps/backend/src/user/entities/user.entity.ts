@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Role } from "../../role/entities/role.entity.js";
 
 @Entity()
@@ -7,15 +7,22 @@ export class User {
     id: number;
     @Column()
     name: string;
-    @Column()
+    @Column({ unique: true })
     email: string;
-    @Column()
+    // scrypt hash in the form "scrypt$N$r$p$salt$hash". Never select this
+    // outside of the login check.
+    @Column({ select: false })
     password: string;
-    @OneToOne(() => Role)
+    // Many users share one role (was OneToOne, which forced role_id UNIQUE).
+    @ManyToOne(() => Role, { nullable: false })
     @JoinColumn({ name: "role_id" })
     role: Role;
     @Column()
     status: boolean;
+    // Bumped on logout / deactivation. JWTs carry the version they were issued
+    // with, so bumping it invalidates every outstanding session for the user.
+    @Column({ default: 0 })
+    session_version: number;
     @Column()
     created_by: number;
     @Column()
