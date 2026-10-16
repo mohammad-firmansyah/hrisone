@@ -8,9 +8,11 @@
   ],
   "scripts": {
     "dev:backend": "bun --filter @hrisone/backend start:dev",
+    "dev:gateway": "bun --filter @hrisone/gateway start:dev",
     "dev:frontend": "bun --filter @hrisone/frontend dev",
     "build": "bun --filter '*' build",
     "build:backend": "bun --filter @hrisone/backend build",
+    "build:gateway": "bun --filter @hrisone/gateway build",
     "build:frontend": "bun --filter @hrisone/frontend build",
     "test": "bun --filter '*' test",
     "lint": "bun --filter '*' lint",
@@ -22,5 +24,8 @@
   },
   "devDependencies": {
     "prettier": "^3.4.2"
+  },
+  "dependencies": {
+    "react-router": "^8.4.0"
   }
 }

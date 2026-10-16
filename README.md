@@ -1,26 +1,53 @@
 # HRIS One Monorepo
 
-Monorepo containing the HRIS One backend (NestJS microservice + TypeORM) and frontend (React + Vite + TypeScript).
+Microservices architecture with an HTTP API Gateway, internal TCP microservice with TypeORM & MySQL, and a React + Vite frontend.
+
+## Architecture
+
+```text
+[ React Frontend ]  (http://localhost:5173)
+        │
+        │ HTTP REST requests
+        ▼
+[ API Gateway ]     (http://localhost:3000)
+        │
+        │ NestJS ClientProxy (TCP port 3001)
+        ▼
+[ Backend Service ] (TCP port 3001)
+        │
+        │ TypeORM
+        ▼
+[ MySQL Database ]  (hrisone on port 3306)
+```
 
 ## Structure
 
 ```text
 hrisone/
 ├── apps/
-│   ├── backend/         # NestJS microservice & TypeORM MySQL database
+│   ├── frontend/        # React + TypeScript + Vite web app (port 5173)
 │   │   ├── src/
-│   │   │   ├── attendance/
-│   │   │   ├── role/
-│   │   │   ├── user/
-│   │   │   └── db/
-│   │   │       ├── datasource/MysqlDatasource.ts
-│   │   │       └── migrations/
 │   │   └── package.json
-│   └── frontend/        # React + TypeScript + Vite web app
+│   │
+│   ├── gateway/         # NestJS HTTP REST API Gateway (port 3000)
+│   │   ├── src/
+│   │   │   ├── user/          # Forwards HTTP to TCP 'findAllUser', etc.
+│   │   │   ├── role/          # Forwards HTTP to TCP 'findAllRole', etc.
+│   │   │   ├── attendance/    # Forwards HTTP to TCP 'findAllAttendance', etc.
+│   │   │   ├── app.module.ts  # Registers ClientProxy (BACKEND_SERVICE)
+│   │   │   └── main.ts        # HTTP server with CORS enabled
+│   │   └── package.json
+│   │
+│   └── backend/         # NestJS TCP Microservice & TypeORM MySQL (TCP port 3001)
 │       ├── src/
-│       │   ├── App.tsx
-│       │   └── main.tsx
+│       │   ├── user/          # @MessagePattern handlers
+│       │   ├── role/
+│       │   ├── attendance/
+│       │   └── db/
+│       │       ├── datasource/MysqlDatasource.ts
+│       │       └── migrations/
 │       └── package.json
+│
 ├── package.json         # Workspace root configuration
 └── bun.lock
 ```
@@ -32,43 +59,39 @@ hrisone/
 bun install
 ```
 
-### 2. Development
+### 2. Run the Services
+
+Open separate terminals or run:
 
 ```bash
-# Start backend (NestJS in watch mode)
+# Terminal 1: Backend Microservice (TCP port 3001)
 bun run dev:backend
 
-# Start frontend (Vite dev server)
+# Terminal 2: API Gateway (HTTP REST port 3000)
+bun run dev:gateway
+
+# Terminal 3: React Frontend (Vite port 5173)
 bun run dev:frontend
 ```
 
-### 3. Build & Test
+Now you can open:
+- **API Gateway in browser/Postman:** [http://localhost:3000/users](http://localhost:3000/users)
+- **Frontend web app:** [http://localhost:5173](http://localhost:5173)
 
+### 3. Build & Test
 ```bash
-# Build both frontend and backend
+# Build all workspaces
 bun run build
 
 # Run unit tests
 bun run test
-
-# Run linter
-bun run lint
 ```
 
 ### 4. Database Migrations (TypeORM)
-
-Run these directly from the root workspace:
-
 ```bash
 # Run pending migrations
 bun run migration:run
 
 # Check migration status
 bun run migration:show
-
-# Revert last migration
-bun run migration:revert
-
-# Generate a new migration
-bun run --filter @hrisone/backend typeorm migration:generate ./src/db/migrations/<migration-name> -d src/db/datasource/MysqlDatasource.ts
 ```
