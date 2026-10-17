@@ -19,17 +19,19 @@ export class UserController {
   }
 
   @MessagePattern('findOneUser')
-  findOne(@Payload() id: number) {
-    return this.userService.findOne(id);
+  findOne(@Payload() id: number | { id: number }) {
+    const numId = typeof id === 'object' && id !== null ? Number(id.id) : Number(id);
+    return this.userService.findOne(numId);
   }
 
   @MessagePattern('updateUser')
   update(@Payload() updateUserDto: UpdateUserDto) {
-    return this.userService.update(updateUserDto.id, updateUserDto);
+    return this.userService.update(Number(updateUserDto.id), updateUserDto);
   }
 
   @MessagePattern('removeUser')
-  remove(@Payload() id: number) {
-    return this.userService.remove(id);
+  remove(@Payload() id: number | { id: number }) {
+    const numId = typeof id === 'object' && id !== null ? Number(id.id) : Number(id);
+    return this.userService.remove(numId);
   }
 }

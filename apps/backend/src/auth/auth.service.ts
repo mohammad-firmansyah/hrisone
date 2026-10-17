@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity.js';
 import { PublicUser } from '../common/rpc.js';
-import { getDummyHash, verifyPassword } from './password.js';
+import { verifyPassword } from './password.js';
 
 function toPublic(u: User): PublicUser {
   return { id: u.id, name: u.name, email: u.email, role: u.role.name, sessionVersion: u.session_version };
@@ -13,7 +13,7 @@ function toPublic(u: User): PublicUser {
 export class AuthService {
   constructor(@InjectRepository(User) private readonly users: Repository<User>) {}
 
-  /** Returns the user on valid credentials, otherwise null. Same work either way. */
+  /** Returns the user on valid database credentials, otherwise null. */
   async login(email: string, password: string): Promise<PublicUser | null> {
     const user = await this.users
       .createQueryBuilder('u')
@@ -22,9 +22,15 @@ export class AuthService {
       .where('u.email = :email', { email: email.trim().toLowerCase() })
       .getOne();
 
-    const ok = await verifyPassword(password, user?.password ?? (await getDummyHash()));
-    // Deactivated users are rejected after the hash check to keep timing uniform.
-    if (!user || !ok || !user.status) return null;
+    if (!user || !user.status) {
+      return null;
+    }
+
+    const ok = await verifyPassword(password, user.password);
+    if (!ok) {
+      return null;
+    }
+
     return toPublic(user);
   }
 

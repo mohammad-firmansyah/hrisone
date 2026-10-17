@@ -19,17 +19,19 @@ export class RoleController {
   }
 
   @MessagePattern('findOneRole')
-  findOne(@Payload() id: number) {
-    return this.roleService.findOne(id);
+  findOne(@Payload() id: number | { id: number }) {
+    const numId = typeof id === 'object' && id !== null ? Number(id.id) : Number(id);
+    return this.roleService.findOne(numId);
   }
 
   @MessagePattern('updateRole')
   update(@Payload() updateRoleDto: UpdateRoleDto) {
-    return this.roleService.update(updateRoleDto.id, updateRoleDto);
+    return this.roleService.update(Number(updateRoleDto.id), updateRoleDto);
   }
 
   @MessagePattern('removeRole')
-  remove(@Payload() id: number) {
-    return this.roleService.remove(id);
+  remove(@Payload() id: number | { id: number }) {
+    const numId = typeof id === 'object' && id !== null ? Number(id.id) : Number(id);
+    return this.roleService.remove(numId);
   }
 }

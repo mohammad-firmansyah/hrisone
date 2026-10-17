@@ -20,7 +20,9 @@
     "typeorm": "bun --filter @hrisone/backend typeorm",
     "migration:run": "bun --filter @hrisone/backend migration:run",
     "migration:revert": "bun --filter @hrisone/backend migration:revert",
-    "migration:show": "bun --filter @hrisone/backend migration:show"
+    "migration:show": "bun --filter @hrisone/backend migration:show",
+    "seed": "bun --filter @hrisone/backend seed",
+    "seed:user": "bun --filter @hrisone/backend seed:user"
   },
   "devDependencies": {
     "prettier": "^3.4.2"

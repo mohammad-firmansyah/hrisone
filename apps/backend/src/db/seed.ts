@@ -1,50 +1,37 @@
 import '../env.js';
 import { MysqlDatasource } from './datasource/MysqlDatasource.js';
-import { hashPassword } from '../auth/password.js';
+import { seedUsers } from './seeders/user.seeder.js';
 
-async function seed() {
+async function main() {
+  const args = process.argv.slice(2);
+  let extraCount = 0;
+  let customPassword: string | undefined;
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--count' && args[i + 1]) {
+      extraCount = Number(args[i + 1]) || 0;
+    }
+    if (args[i] === '--password' && args[i + 1]) {
+      customPassword = args[i + 1];
+    }
+  }
+
+  console.log('Connecting to database...');
   await MysqlDatasource.initialize();
-  console.log('Seeding initial users...');
 
-  const passwordHash = await hashPassword('@Mohammad842');
-
-  // Check or create admin
-  const existingAdmin = await MysqlDatasource.query(
-    'SELECT id FROM user WHERE email = ?',
-    ['admin@hris.com']
-  );
-  if (existingAdmin.length === 0) {
-    await MysqlDatasource.query(
-      `INSERT INTO user (name, email, password, role_id, status, session_version, created_by, updated_by)
-       VALUES (?, ?, ?, 1, 1, 0, 1, 1)`,
-      ['Administrator', 'admin@hris.com', passwordHash]
-    );
-    console.log('Created default admin: admin@hris.com / @Mohammad842');
-  } else {
-    console.log('Admin already exists.');
+  try {
+    await seedUsers(MysqlDatasource, {
+      extraCount,
+      defaultPassword: customPassword,
+    });
+  } finally {
+    if (MysqlDatasource.isInitialized) {
+      await MysqlDatasource.destroy();
+    }
   }
-
-  // Check or create regular user
-  const existingUser = await MysqlDatasource.query(
-    'SELECT id FROM user WHERE email = ?',
-    ['user@hris.com']
-  );
-  if (existingUser.length === 0) {
-    await MysqlDatasource.query(
-      `INSERT INTO user (name, email, password, role_id, status, session_version, created_by, updated_by)
-       VALUES (?, ?, ?, 2, 1, 0, 1, 1)`,
-      ['John Employee', 'user@hris.com', passwordHash]
-    );
-    console.log('Created default employee: user@hris.com / @Mohammad842');
-  } else {
-    console.log('Employee already exists.');
-  }
-
-  await MysqlDatasource.destroy();
-  console.log('Seeding complete.');
 }
 
-seed().catch((err) => {
-  console.error('Seed error:', err);
+main().catch((err) => {
+  console.error('Fatal seed error:', err);
   process.exit(1);
 });

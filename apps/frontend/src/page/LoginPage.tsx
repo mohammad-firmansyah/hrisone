@@ -51,12 +51,6 @@ export const LoginPage = () => {
     }
   };
 
-  const fillCredentials = (userEmail: string) => {
-    setEmail(userEmail);
-    setPassword('@Mohammad842');
-    setError(null);
-  };
-
   return (
     <div className="login-wrapper">
       <div className="login-card">
@@ -98,26 +92,6 @@ export const LoginPage = () => {
             {isSubmitting ? 'Signing in...' : 'Sign In'}
           </ActionButton>
         </form>
-
-        <div className="demo-credentials">
-          <p className="demo-title">Quick Demo Login</p>
-          <div className="demo-buttons">
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => fillCredentials('admin@hris.com')}
-            >
-              Fill Admin (admin@hris.com)
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => fillCredentials('user@hris.com')}
-            >
-              Fill Employee (user@hris.com)
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

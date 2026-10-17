@@ -23,7 +23,9 @@
     "typeorm": "typeorm-ts-node-esm",
     "migration:run": "typeorm-ts-node-esm migration:run -d src/db/datasource/MysqlDatasource.ts",
     "migration:revert": "typeorm-ts-node-esm migration:revert -d src/db/datasource/MysqlDatasource.ts",
-    "migration:show": "typeorm-ts-node-esm migration:show -d src/db/datasource/MysqlDatasource.ts"
+    "migration:show": "typeorm-ts-node-esm migration:show -d src/db/datasource/MysqlDatasource.ts",
+    "seed": "bun src/db/seed.ts",
+    "seed:user": "bun src/db/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
