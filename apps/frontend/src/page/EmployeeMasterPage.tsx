@@ -24,19 +24,16 @@ export const EmployeeMasterPage = () => {
   const { user: currentUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Employee list state
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [roles, setRoles] = useState<RoleEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
 
-  // Add Modal State
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [addName, setAddName] = useState('');
   const [addEmail, setAddEmail] = useState('');
@@ -46,7 +43,6 @@ export const EmployeeMasterPage = () => {
   const [addError, setAddError] = useState<string | null>(null);
   const [isSubmittingAdd, setIsSubmittingAdd] = useState(false);
 
-  // Edit Modal State
   const [editingEmployee, setEditingEmployee] = useState<EmployeeItem | null>(null);
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
@@ -56,11 +52,9 @@ export const EmployeeMasterPage = () => {
   const [editError, setEditError] = useState<string | null>(null);
   const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
 
-  // Delete Confirm Modal State
   const [deletingEmployee, setDeletingEmployee] = useState<EmployeeItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Authorization check: Only Admin / Superadmin
   useEffect(() => {
     if (!authLoading) {
       if (!currentUser) {
@@ -74,7 +68,6 @@ export const EmployeeMasterPage = () => {
     }
   }, [currentUser, authLoading, navigate]);
 
-  // Fetch employees and roles
   const loadData = async () => {
     try {
       setLoading(true);
@@ -98,7 +91,6 @@ export const EmployeeMasterPage = () => {
         const roleList: RoleEntity[] = Array.isArray(rolesData) ? rolesData : [];
         setRoles(roleList);
         if (roleList.length > 0 && addRoleId === '') {
-          // Default to regular USER role if available
           const defaultUserRole = roleList.find((r) => r.name.toUpperCase() === 'USER') || roleList[0];
           setAddRoleId(defaultUserRole.id);
         }
@@ -119,7 +111,6 @@ export const EmployeeMasterPage = () => {
     }
   }, [currentUser]);
 
-  // Open Edit Modal
   const handleOpenEdit = (emp: EmployeeItem) => {
     setEditingEmployee(emp);
     setEditName(emp.name);
@@ -130,7 +121,6 @@ export const EmployeeMasterPage = () => {
     setEditError(null);
   };
 
-  // Submit Add Employee
   const handleCreateEmployee = async (e: FormEvent) => {
     e.preventDefault();
     if (!addName.trim() || !addEmail.trim() || !addPassword) {
@@ -181,7 +171,6 @@ export const EmployeeMasterPage = () => {
     }
   };
 
-  // Submit Edit Employee
   const handleUpdateEmployee = async (e: FormEvent) => {
     e.preventDefault();
     if (!editingEmployee) return;
@@ -233,7 +222,6 @@ export const EmployeeMasterPage = () => {
     }
   };
 
-  // Quick Toggle Status
   const handleToggleStatus = async (emp: EmployeeItem) => {
     if (currentUser?.id === emp.id) {
       alert('Anda tidak dapat menonaktifkan akun Anda sendiri.');
@@ -266,7 +254,6 @@ export const EmployeeMasterPage = () => {
     }
   };
 
-  // Delete Employee Confirmation
   const handleDeleteEmployee = async () => {
     if (!deletingEmployee) return;
 
@@ -298,7 +285,6 @@ export const EmployeeMasterPage = () => {
     }
   };
 
-  // Filtered employees calculation
   const filteredEmployees = employees.filter((emp) => {
     const matchesSearch =
       emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -315,7 +301,6 @@ export const EmployeeMasterPage = () => {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  // KPI Metrics
   const totalEmployees = employees.length;
   const activeEmployees = employees.filter((e) => e.status).length;
   const inactiveEmployees = totalEmployees - activeEmployees;
@@ -330,7 +315,6 @@ export const EmployeeMasterPage = () => {
 
   return (
     <div className="admin-container">
-      {/* Top Admin Sub-Navigation */}
       <div className="admin-subnav">
         <NavLink to="/admin/employees" className="admin-tab active">
           Master Data Karyawan
@@ -340,7 +324,6 @@ export const EmployeeMasterPage = () => {
         </NavLink>
       </div>
 
-      {/* Page Header */}
       <div className="page-header">
         <div>
           <h2>Master Data Karyawan</h2>
@@ -362,7 +345,6 @@ export const EmployeeMasterPage = () => {
         </div>
       </div>
 
-      {/* KPI Stats Cards */}
       <div className="kpi-grid">
         <div className="kpi-card">
           <span className="kpi-label">Total Karyawan</span>
@@ -386,7 +368,6 @@ export const EmployeeMasterPage = () => {
         </div>
       </div>
 
-      {/* Feedback Alerts */}
       {error && <div className="alert alert-error">{error}</div>}
       {successMessage && (
         <div className="alert alert-success">
@@ -401,9 +382,7 @@ export const EmployeeMasterPage = () => {
         </div>
       )}
 
-      {/* Employee Directory Card */}
       <div className="card table-card">
-        {/* Filters and Search Toolbar */}
         <div className="table-toolbar">
           <div className="toolbar-search">
             <svg className="search-icon-svg" viewBox="0 0 20 20" fill="currentColor">
@@ -467,7 +446,6 @@ export const EmployeeMasterPage = () => {
           </div>
         </div>
 
-        {/* Employee Table */}
         {loading ? (
           <div className="table-loading">Memuat direktori data master karyawan...</div>
         ) : filteredEmployees.length === 0 ? (
@@ -512,7 +490,7 @@ export const EmployeeMasterPage = () => {
                       <td>
                         <span className="status-indicator">
                           <span className={`status-dot ${emp.status ? 'dot-active' : 'dot-inactive'}`} />
-                          <span className="mono-text" style={{ color: emp.status ? '#34d399' : '#f87171' }}>
+                          <span className="mono-text" style={{ color: emp.status ? '#16a34a' : '#dc2626' }}>
                             {emp.status ? 'Aktif' : 'Nonaktif'}
                           </span>
                         </span>
@@ -560,7 +538,6 @@ export const EmployeeMasterPage = () => {
         )}
       </div>
 
-      {/* Modal: Tambah Karyawan Baru */}
       {isAddOpen && (
         <div className="modal-backdrop" onClick={() => setIsAddOpen(false)}>
           <div className="modal-content modal-form" onClick={(e) => e.stopPropagation()}>
@@ -675,7 +652,6 @@ export const EmployeeMasterPage = () => {
         </div>
       )}
 
-      {/* Modal: Edit Data Karyawan */}
       {editingEmployee && (
         <div className="modal-backdrop" onClick={() => setEditingEmployee(null)}>
           <div className="modal-content modal-form" onClick={(e) => e.stopPropagation()}>
@@ -749,7 +725,7 @@ export const EmployeeMasterPage = () => {
                   </div>
                 </div>
 
-                <div className="form-group" style={{ marginTop: '0.75rem', borderTop: '1px solid #334155', paddingTop: '1rem' }}>
+                <div className="form-group" style={{ marginTop: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
                   <label className="form-label">
                     Reset Password <span className="text-muted">(Opsional)</span>
                   </label>
@@ -789,7 +765,6 @@ export const EmployeeMasterPage = () => {
         </div>
       )}
 
-      {/* Modal: Konfirmasi Hapus Karyawan */}
       {deletingEmployee && (
         <div className="modal-backdrop" onClick={() => setDeletingEmployee(null)}>
           <div className="modal-content modal-confirm" onClick={(e) => e.stopPropagation()}>

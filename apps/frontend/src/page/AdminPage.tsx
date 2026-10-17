@@ -30,14 +30,10 @@ export const AdminPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
-
-  // Modal photo preview
   const [activePhotoUrl, setActivePhotoUrl] = useState<string | null>(null);
 
-  // Role protection: Only admins may access this page
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
@@ -115,7 +111,6 @@ export const AdminPage = () => {
 
   return (
     <div className="admin-container">
-      {/* Top Admin Sub-Navigation */}
       <div className="admin-subnav">
         <NavLink to="/admin/employees" className="admin-tab">
           Master Data Karyawan
@@ -141,7 +136,6 @@ export const AdminPage = () => {
       {error && <div className="alert alert-error">{error}</div>}
 
       <div className="card table-card">
-        {/* Search & Date Filters Toolbar */}
         <div className="table-toolbar">
           <form onSubmit={handleSearchSubmit} className="toolbar-search">
             <svg className="search-icon-svg" viewBox="0 0 20 20" fill="currentColor">
@@ -328,7 +322,6 @@ export const AdminPage = () => {
           </div>
         )}
 
-        {/* Pagination */}
         {total > pageSize && (
           <div className="pagination">
             <button
@@ -354,7 +347,6 @@ export const AdminPage = () => {
         )}
       </div>
 
-      {/* Photo Modal */}
       {activePhotoUrl && (
         <div className="modal-backdrop" onClick={() => setActivePhotoUrl(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>

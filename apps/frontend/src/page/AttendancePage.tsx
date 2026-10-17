@@ -27,7 +27,6 @@ export const AttendancePage = () => {
   const [history, setHistory] = useState<AttendanceRecord[]>([]);
   const [loadingStatus, setLoadingStatus] = useState(true);
 
-  // Form states
   const [notes, setNotes] = useState('');
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<string>('Detecting location...');
@@ -38,12 +37,10 @@ export const AttendancePage = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Modal photo preview
   const [activePhotoUrl, setActivePhotoUrl] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Redirect admin to /admin page
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
@@ -57,12 +54,10 @@ export const AttendancePage = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Fetch location using browser Geolocation API
   const detectLocation = () => {
     setLocationStatus('Detecting GPS location...');
     if (!navigator.geolocation) {
-      // Fallback coordinates for dev/environments without GPS
-      setCoords({ lat: -6.2088, lng: 106.8456 }); // Jakarta default
+      setCoords({ lat: -6.2088, lng: 106.8456 });
       setLocationStatus('Geolocation not supported. Using office default.');
       return;
     }
@@ -76,7 +71,6 @@ export const AttendancePage = () => {
         setLocationStatus('GPS location acquired.');
       },
       (err) => {
-        // Fallback gracefully so user is not blocked
         setCoords({ lat: -6.2088, lng: 106.8456 });
         setLocationStatus(`GPS unavailable (${err.message}). Using fallback location.`);
       },
@@ -254,7 +248,6 @@ export const AttendancePage = () => {
       {successMessage && <div className="alert alert-success">{successMessage}</div>}
 
       <div className="attendance-grid">
-        {/* Main Action Card */}
         <div className="card action-card">
           {status?.state === 'none' && (
             <form onSubmit={handleClockIn} className="attendance-form">
@@ -277,7 +270,6 @@ export const AttendancePage = () => {
                 />
               </div>
 
-              {/* Location section */}
               <div className="form-group">
                 <label className="form-label">Location (GPS)</label>
                 <div className="location-box">
@@ -294,7 +286,6 @@ export const AttendancePage = () => {
                 </div>
               </div>
 
-              {/* Photo Upload section */}
               <div className="form-group">
                 <label className="form-label">Photo Verification *</label>
                 <input
@@ -345,7 +336,6 @@ export const AttendancePage = () => {
               <h3>Clock Out</h3>
               <p className="form-description">Upload your end-of-day photo proof to complete attendance.</p>
 
-              {/* Location section */}
               <div className="form-group">
                 <label className="form-label">Location (GPS)</label>
                 <div className="location-box">
@@ -362,7 +352,6 @@ export const AttendancePage = () => {
                 </div>
               </div>
 
-              {/* Photo Upload section */}
               <div className="form-group">
                 <label className="form-label">Clock Out Photo Verification *</label>
                 <input
@@ -424,7 +413,6 @@ export const AttendancePage = () => {
           )}
         </div>
 
-        {/* History Table Card */}
         <div className="card history-card" style={{ padding: 0, overflow: 'hidden' }}>
           <div className="table-header-row">
             <h3>Attendance History</h3>
@@ -505,7 +493,6 @@ export const AttendancePage = () => {
         </div>
       </div>
 
-      {/* Photo Modal */}
       {activePhotoUrl && (
         <div className="modal-backdrop" onClick={() => setActivePhotoUrl(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>

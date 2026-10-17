@@ -14,7 +14,6 @@ export const LoginPage = () => {
   const { user, login } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
   useEffect(() => {
     if (user) {
       const role = (user.role || '').toUpperCase();

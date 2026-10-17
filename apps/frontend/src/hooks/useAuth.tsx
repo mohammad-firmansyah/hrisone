@@ -78,7 +78,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: 'include',
       });
     } catch {
-      // Continue client cleanup even if network request fails
     } finally {
       setUser(null);
       window.location.href = '/';

@@ -4,9 +4,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: dark;
-  color: #f8fafc;
-  background-color: #0f172a;
+  color-scheme: light;
+  color: #0f172a;
+  background-color: #f8fafc;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -24,7 +24,8 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100vh;
-  background-color: #0f172a;
+  background-color: #f8fafc;
+  color: #0f172a;
 }
 
 #root {
