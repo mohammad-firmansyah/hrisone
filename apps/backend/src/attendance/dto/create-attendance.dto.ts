@@ -24,7 +24,10 @@ export class ListAllPayload {
   requesterId: number;
   page?: number;
   pageSize?: number;
+  search?: string;
+  date?: string;
 }
+
 
 export class PhotoRequestPayload {
   requesterId: number;

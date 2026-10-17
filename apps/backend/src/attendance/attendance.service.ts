@@ -133,17 +133,29 @@ export class AttendanceService {
     return rows.map((r) => toView(r));
   }
 
-  /** Admin-only, read-only listing of everyone's attendance. */
+  /** Admin-only, read-only listing of everyone's attendance with optional search and date filters. */
   async all(p: ListAllPayload) {
     if (!isAdminRole(await this.roleOf(p.requesterId))) throw rpcError(HttpStatus.FORBIDDEN, 'Forbidden.');
     const pageSize = Math.min(Math.max(Math.trunc(Number(p.pageSize) || 20), 1), 100);
     const page = Math.max(Math.trunc(Number(p.page) || 1), 1);
-    const [rows, total] = await this.repo.findAndCount({
-      relations: { user: true },
-      order: { clock_in: 'DESC' },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-    });
+
+    const qb = this.repo
+      .createQueryBuilder('a')
+      .innerJoinAndSelect('a.user', 'u')
+      .orderBy('a.clock_in', 'DESC')
+      .skip((page - 1) * pageSize)
+      .take(pageSize);
+
+    if (p.search && p.search.trim()) {
+      const term = `%${p.search.trim().toLowerCase()}%`;
+      qb.andWhere('(LOWER(u.name) LIKE :term OR LOWER(u.email) LIKE :term)', { term });
+    }
+
+    if (p.date && /^\d{4}-\d{2}-\d{2}$/.test(p.date.trim())) {
+      qb.andWhere('DATE(a.clock_in) = :filterDate', { filterDate: p.date.trim() });
+    }
+
+    const [rows, total] = await qb.getManyAndCount();
     return { items: rows.map((r) => toView(r, true)), total, page, pageSize };
   }
 

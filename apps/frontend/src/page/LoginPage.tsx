@@ -55,9 +55,9 @@ export const LoginPage = () => {
     <div className="login-wrapper">
       <div className="login-card">
         <div className="login-header">
-          <div className="brand-badge">HRIS One</div>
-          <h2>Welcome Back</h2>
-          <p className="subtitle">Sign in to record attendance or manage logs</p>
+          <div className="brand-badge">HRIS ONE</div>
+          <h2>Sign In</h2>
+          <p className="subtitle">Enter your employee or administrator credentials</p>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}

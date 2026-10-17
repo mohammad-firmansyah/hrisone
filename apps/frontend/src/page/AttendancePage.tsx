@@ -281,8 +281,8 @@ export const AttendancePage = () => {
               <div className="form-group">
                 <label className="form-label">Location (GPS)</label>
                 <div className="location-box">
-                  <span className="location-text">
-                    📍 {coords ? `Lat: ${coords.lat}, Lng: ${coords.lng}` : locationStatus}
+                  <span className="location-text mono-text">
+                    {coords ? `Lat: ${coords.lat}, Lng: ${coords.lng}` : locationStatus}
                   </span>
                   <button
                     type="button"
@@ -331,7 +331,7 @@ export const AttendancePage = () => {
                 <h3>Currently Clocked In</h3>
                 <p>
                   Started at:{' '}
-                  <strong>
+                  <strong className="mono-text">
                     {status.current?.clockIn
                       ? new Date(status.current.clockIn).toLocaleTimeString()
                       : ''}
@@ -349,8 +349,8 @@ export const AttendancePage = () => {
               <div className="form-group">
                 <label className="form-label">Location (GPS)</label>
                 <div className="location-box">
-                  <span className="location-text">
-                    📍 {coords ? `Lat: ${coords.lat}, Lng: ${coords.lng}` : locationStatus}
+                  <span className="location-text mono-text">
+                    {coords ? `Lat: ${coords.lat}, Lng: ${coords.lng}` : locationStatus}
                   </span>
                   <button
                     type="button"
@@ -395,21 +395,29 @@ export const AttendancePage = () => {
 
           {status?.state === 'done' && (
             <div className="done-card">
-              <div className="done-icon">✅</div>
+              <div className="done-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
               <h3>Attendance Complete For Today</h3>
-              <p>You have clocked in and clocked out today.</p>
+              <p className="subtitle">You have recorded your clock in and clock out for today.</p>
               <div className="done-details">
                 <div>
-                  <strong>Clock In:</strong>{' '}
-                  {status.current?.clockIn
-                    ? new Date(status.current.clockIn).toLocaleTimeString()
-                    : '-'}
+                  <span className="text-muted">Clock In:</span>{' '}
+                  <strong>
+                    {status.current?.clockIn
+                      ? new Date(status.current.clockIn).toLocaleTimeString()
+                      : '-'}
+                  </strong>
                 </div>
                 <div>
-                  <strong>Clock Out:</strong>{' '}
-                  {status.current?.clockOut
-                    ? new Date(status.current.clockOut).toLocaleTimeString()
-                    : '-'}
+                  <span className="text-muted">Clock Out:</span>{' '}
+                  <strong>
+                    {status.current?.clockOut
+                      ? new Date(status.current.clockOut).toLocaleTimeString()
+                      : '-'}
+                  </strong>
                 </div>
               </div>
             </div>
@@ -417,10 +425,12 @@ export const AttendancePage = () => {
         </div>
 
         {/* History Table Card */}
-        <div className="card history-card">
-          <h3>Your Attendance History</h3>
+        <div className="card history-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="table-header-row">
+            <h3>Attendance History</h3>
+          </div>
           {history.length === 0 ? (
-            <p className="empty-text">No attendance records yet.</p>
+            <p className="empty-state">No attendance records yet.</p>
           ) : (
             <div className="table-wrapper">
               <table className="data-table">
@@ -436,25 +446,33 @@ export const AttendancePage = () => {
                 <tbody>
                   {history.map((rec) => (
                     <tr key={rec.id}>
-                      <td>{new Date(rec.clockIn).toLocaleDateString()}</td>
                       <td>
-                        {new Date(rec.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        <br />
-                        <small className="geo-tag">
-                          📍 {rec.clockInLocation?.latitude?.toFixed(4)}, {rec.clockInLocation?.longitude?.toFixed(4)}
-                        </small>
+                        <span className="mono-text">
+                          {new Date(rec.clockIn).toLocaleDateString()}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="time-geo">
+                          <strong className="mono-text">
+                            {new Date(rec.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </strong>
+                          <span className="geo-tag mono-text">
+                            {rec.clockInLocation?.latitude?.toFixed(4)}, {rec.clockInLocation?.longitude?.toFixed(4)}
+                          </span>
+                        </div>
                       </td>
                       <td>
                         {rec.clockOut ? (
-                          <>
-                            {new Date(rec.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            <br />
-                            <small className="geo-tag">
-                              📍 {rec.clockOutLocation?.latitude?.toFixed(4)}, {rec.clockOutLocation?.longitude?.toFixed(4)}
-                            </small>
-                          </>
+                          <div className="time-geo">
+                            <strong className="mono-text">
+                              {new Date(rec.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </strong>
+                            <span className="geo-tag mono-text">
+                              {rec.clockOutLocation?.latitude?.toFixed(4)}, {rec.clockOutLocation?.longitude?.toFixed(4)}
+                            </span>
+                          </div>
                         ) : (
-                          <span className="badge badge-pending">Active</span>
+                          <span className="badge badge-active">In Progress</span>
                         )}
                       </td>
                       <td className="note-cell">{rec.notes}</td>

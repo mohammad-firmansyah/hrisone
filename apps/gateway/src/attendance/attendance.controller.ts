@@ -184,6 +184,8 @@ export class AttendanceController {
     @Req() req: AuthenticatedRequest,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
+    @Query('search') search?: string,
+    @Query('date') date?: string,
   ) {
     const role = (req.user.role || '').toUpperCase();
     if (role !== 'ADMIN' && role !== 'SUPERADMIN') {
@@ -196,6 +198,8 @@ export class AttendanceController {
           requesterId: req.user.id,
           page: Number(page) || 1,
           pageSize: Number(pageSize) || 20,
+          search: search ? String(search).trim() : undefined,
+          date: date ? String(date).trim() : undefined,
         }),
       );
     } catch (e) {

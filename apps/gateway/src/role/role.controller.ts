@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { AuthGuard } from '../auth/auth.guard.js';
+import { AuthGuard, Roles } from '../auth/auth.guard.js';
 
 function handleRpcError(err: any): never {
   const status = err?.status || err?.error?.status || HttpStatus.INTERNAL_SERVER_ERROR;
@@ -23,6 +23,7 @@ function handleRpcError(err: any): never {
 
 @Controller('roles')
 @UseGuards(AuthGuard)
+@Roles('ADMIN', 'SUPERADMIN')
 export class RoleController {
   constructor(
     @Inject('BACKEND_SERVICE') private readonly backendClient: ClientProxy,

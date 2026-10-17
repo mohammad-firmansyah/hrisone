@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, NavLink } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
 
 interface AdminAttendanceItem {
@@ -30,6 +30,10 @@ export const AdminPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Search & Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+
   // Modal photo preview
   const [activePhotoUrl, setActivePhotoUrl] = useState<string | null>(null);
 
@@ -51,16 +55,28 @@ export const AdminPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(
-        `${API_BASE}/attendance/all?page=${targetPage}&pageSize=${pageSize}`,
-        { credentials: 'include' },
-      );
+
+      const params = new URLSearchParams({
+        page: String(targetPage),
+        pageSize: String(pageSize),
+      });
+
+      if (searchQuery.trim()) {
+        params.append('search', searchQuery.trim());
+      }
+      if (dateFilter.trim()) {
+        params.append('date', dateFilter.trim());
+      }
+
+      const res = await fetch(`${API_BASE}/attendance/all?${params.toString()}`, {
+        credentials: 'include',
+      });
 
       if (!res.ok) {
         if (res.status === 403) {
-          throw new Error('Access denied. Administrator privileges required.');
+          throw new Error('Akses ditolak. Memerlukan hak akses Administrator.');
         }
-        throw new Error('Failed to load attendance logs.');
+        throw new Error('Gagal memuat log absensi.');
       }
 
       const data = await res.json();
@@ -68,7 +84,7 @@ export const AdminPage = () => {
       setTotal(data.total || 0);
       setPage(data.page || 1);
     } catch (err: any) {
-      setError(err?.message || 'Error loading attendance logs.');
+      setError(err?.message || 'Terjadi kesalahan saat memuat log absensi.');
     } finally {
       setLoading(false);
     }
@@ -81,62 +97,138 @@ export const AdminPage = () => {
         fetchLogs(page);
       }
     }
-  }, [user, page]);
+  }, [user, page, dateFilter]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchLogs(1);
+  };
+
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setDateFilter('');
+  };
 
   if (authLoading) {
-    return <div className="page-loading">Checking authorization...</div>;
+    return <div className="page-loading">Memeriksa otorisasi...</div>;
   }
 
   return (
     <div className="admin-container">
+      {/* Top Admin Sub-Navigation */}
+      <div className="admin-subnav">
+        <NavLink to="/admin/employees" className="admin-tab">
+          Master Data Karyawan
+        </NavLink>
+        <NavLink to="/admin/attendance" className="admin-tab active">
+          Kontrol Absensi
+        </NavLink>
+      </div>
+
       <div className="page-header">
         <div>
-          <h2>Employee Attendance Logs</h2>
+          <h2>Kontrol Absensi Karyawan</h2>
           <p className="subtitle">
-            Admin oversight: View all employee WFH attendance, GPS locations, and photo records.
+            Pemantauan kehadiran pegawai, presensi WFH, verifikasi koordinat GPS, dan bukti foto secara real-time.
           </p>
         </div>
         <div className="header-meta">
-          <span className="badge badge-admin">Administrator View</span>
-          <span className="badge badge-readonly">🔒 Read-Only (Immutable Audit Log)</span>
+          <span className="badge badge-admin">Admin HRD</span>
+          <span className="badge badge-readonly">Audit Log (Read-only)</span>
         </div>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
 
       <div className="card table-card">
+        {/* Search & Date Filters Toolbar */}
+        <div className="table-toolbar">
+          <form onSubmit={handleSearchSubmit} className="toolbar-search">
+            <svg className="search-icon-svg" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <input
+              type="text"
+              placeholder="Cari nama atau email karyawan..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                className="clear-search-btn"
+                onClick={() => {
+                  setSearchQuery('');
+                  fetchLogs(1);
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </form>
+
+          <div className="toolbar-filters">
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="filter-select"
+              title="Filter Berdasarkan Tanggal"
+            />
+
+            {(searchQuery || dateFilter) && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handleResetFilters}
+              >
+                Reset Filter
+              </button>
+            )}
+
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => fetchLogs(page)}
+              disabled={loading}
+            >
+              {loading ? 'Memuat...' : 'Segarkan'}
+            </button>
+          </div>
+        </div>
+
         <div className="table-header-row">
           <h3>
-            All Recorded Logs <span className="text-muted">({total} total)</span>
+            Daftar Kehadiran Masuk <span className="text-muted">({total} total riwayat)</span>
           </h3>
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={() => fetchLogs(page)}
-            disabled={loading}
-          >
-            {loading ? 'Refreshing...' : '↻ Refresh Logs'}
-          </button>
+          <span className="text-muted text-sm mono-text">
+            Log presensi WFH karyawan
+          </span>
         </div>
 
         {loading ? (
-          <div className="table-loading">Loading attendance records...</div>
+          <div className="table-loading">Memuat data absensi...</div>
         ) : items.length === 0 ? (
           <div className="empty-state">
-            <p>No attendance records found yet.</p>
+            <p>Tidak ditemukan data presensi karyawan yang sesuai.</p>
           </div>
         ) : (
           <div className="table-wrapper">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Employee</th>
-                  <th>Date</th>
-                  <th>Type</th>
-                  <th>Clock In</th>
-                  <th>Clock Out</th>
-                  <th>WFH Note</th>
-                  <th>Photos</th>
+                  <th>Karyawan</th>
+                  <th>Tanggal</th>
+                  <th>Tipe</th>
+                  <th>Jam Masuk (Clock In)</th>
+                  <th>Jam Keluar (Clock Out)</th>
+                  <th>Catatan WFH</th>
+                  <th>Bukti Foto</th>
                 </tr>
               </thead>
               <tbody>
@@ -144,11 +236,15 @@ export const AdminPage = () => {
                   <tr key={item.id}>
                     <td>
                       <div className="user-info">
-                        <strong>{item.user?.name || 'Unknown'}</strong>
+                        <strong>{item.user?.name || 'Tidak Diketahui'}</strong>
                         <span className="user-email">{item.user?.email || '-'}</span>
                       </div>
                     </td>
-                    <td>{new Date(item.clockIn).toLocaleDateString()}</td>
+                    <td>
+                      <span className="mono-text">
+                        {new Date(item.clockIn).toLocaleDateString('id-ID', { dateStyle: 'medium' })}
+                      </span>
+                    </td>
                     <td>
                       <span className="badge badge-wfh">{item.type || 'WFH'}</span>
                     </td>
@@ -160,10 +256,20 @@ export const AdminPage = () => {
                             minute: '2-digit',
                           })}
                         </strong>
-                        <span className="geo-tag">
-                          📍 {item.clockInLocation?.latitude?.toFixed(4)},{' '}
+                        <a
+                          href={`https://www.google.com/maps?q=${item.clockInLocation?.latitude},${item.clockInLocation?.longitude}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="geo-link"
+                          title="Buka lokasi di Google Maps"
+                        >
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                          </svg>
+                          {item.clockInLocation?.latitude?.toFixed(4)},{' '}
                           {item.clockInLocation?.longitude?.toFixed(4)}
-                        </span>
+                        </a>
                       </div>
                     </td>
                     <td>
@@ -175,13 +281,23 @@ export const AdminPage = () => {
                               minute: '2-digit',
                             })}
                           </strong>
-                          <span className="geo-tag">
-                            📍 {item.clockOutLocation?.latitude?.toFixed(4)},{' '}
+                          <a
+                            href={`https://www.google.com/maps?q=${item.clockOutLocation?.latitude},${item.clockOutLocation?.longitude}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="geo-link"
+                            title="Buka lokasi di Google Maps"
+                          >
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                              <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            {item.clockOutLocation?.latitude?.toFixed(4)},{' '}
                             {item.clockOutLocation?.longitude?.toFixed(4)}
-                          </span>
+                          </a>
                         </div>
                       ) : (
-                        <span className="badge badge-active">In Progress</span>
+                        <span className="badge badge-active">Sedang Bekerja</span>
                       )}
                     </td>
                     <td className="note-cell">{item.notes}</td>
@@ -192,7 +308,7 @@ export const AdminPage = () => {
                           className="btn btn-secondary btn-xs"
                           onClick={() => setActivePhotoUrl(`${API_BASE}/attendance/${item.id}/photo/in`)}
                         >
-                          Clock-In
+                          Foto Masuk
                         </button>
                         {item.clockOut && (
                           <button
@@ -200,7 +316,7 @@ export const AdminPage = () => {
                             className="btn btn-secondary btn-xs"
                             onClick={() => setActivePhotoUrl(`${API_BASE}/attendance/${item.id}/photo/out`)}
                           >
-                            Clock-Out
+                            Foto Keluar
                           </button>
                         )}
                       </div>
@@ -221,10 +337,10 @@ export const AdminPage = () => {
               disabled={page <= 1 || loading}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              Previous
+              Sebelumnya
             </button>
             <span className="page-indicator">
-              Page {page} of {Math.ceil(total / pageSize)}
+              Halaman {page} dari {Math.ceil(total / pageSize)}
             </span>
             <button
               type="button"
@@ -232,7 +348,7 @@ export const AdminPage = () => {
               disabled={page >= Math.ceil(total / pageSize) || loading}
               onClick={() => setPage((p) => p + 1)}
             >
-              Next
+              Selanjutnya
             </button>
           </div>
         )}
@@ -243,7 +359,7 @@ export const AdminPage = () => {
         <div className="modal-backdrop" onClick={() => setActivePhotoUrl(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h4>Employee Attendance Photo Proof</h4>
+              <h4>Verifikasi Bukti Foto Absensi Karyawan</h4>
               <button
                 type="button"
                 className="close-btn"
@@ -253,7 +369,7 @@ export const AdminPage = () => {
               </button>
             </div>
             <div className="modal-body">
-              <img src={activePhotoUrl} alt="Employee verification proof" className="modal-image" />
+              <img src={activePhotoUrl} alt="Bukti foto kehadiran karyawan" className="modal-image" />
             </div>
           </div>
         </div>

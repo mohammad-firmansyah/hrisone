@@ -18,27 +18,43 @@ export function App() {
       <header className="app-navbar">
         <div className="navbar-container">
           <div className="navbar-brand">
-            <span className="brand-logo">⚡</span>
-            <span className="brand-name">HRIS One</span>
+            <span className="brand-icon">H</span>
+            <span>HRIS One</span>
           </div>
 
           {user ? (
             <div className="navbar-controls">
               <nav className="navbar-links">
                 {isAdmin ? (
-                  <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                    Attendance Logs (Admin)
-                  </NavLink>
+                  <>
+                    <NavLink
+                      to="/admin/employees"
+                      className={({ isActive }) =>
+                        `nav-item ${isActive || window.location.pathname === '/admin' ? 'active' : ''}`
+                      }
+                    >
+                      Master Karyawan
+                    </NavLink>
+                    <NavLink
+                      to="/admin/attendance"
+                      className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                      Kontrol Absensi
+                    </NavLink>
+                  </>
                 ) : (
-                  <NavLink to="/attendance" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                    My Attendance
+                  <NavLink
+                    to="/attendance"
+                    className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                  >
+                    Presensi WFH
                   </NavLink>
                 )}
               </nav>
 
               <div className="user-profile">
                 <span className="user-name">{user.name}</span>
-                <span className={`role-badge ${isAdmin ? 'role-admin' : 'role-user'}`}>
+                <span className={`badge ${isAdmin ? 'badge-admin' : 'badge-user'}`}>
                   {user.role}
                 </span>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={handleLogout}>
